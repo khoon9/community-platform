@@ -2,6 +2,7 @@ package com.community.platform.repository;
 
 import com.community.platform.config.JpaConfig;
 import com.community.platform.domain.Article;
+import com.community.platform.domain.UserAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +21,16 @@ class JpaRepositoryTest {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
 
     public JpaRepositoryTest(
             @Autowired ArticleRepository articleRepository,
-            @Autowired ArticleCommentRepository articleCommentRepository
-    ) {
+            @Autowired ArticleCommentRepository articleCommentRepository,
+            @Autowired UserAccountRepository userAccountRepository,
+            UserAccountRepository userAccountRepository1) {
         this.articleRepository = articleRepository;
         this.articleCommentRepository = articleCommentRepository;
+        this.userAccountRepository = userAccountRepository1;
     }
 
     @DisplayName("select 테스트")
@@ -50,7 +54,8 @@ class JpaRepositoryTest {
         long previousCount = articleRepository.count();
 
         // When
-        Article savedArticle = articleRepository.save(Article.of("new article", "new content", "#spring"));
+        UserAccount userAccount = userAccountRepository.save(UserAccount.of("uno", "pw", null, null, null));
+        Article article = Article.of(userAccount, "new article", "new content", "#spring");
 
         // Then
         assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
@@ -66,6 +71,7 @@ class JpaRepositoryTest {
 
         // When
         Article savedArticle = articleRepository.saveAndFlush(article);
+        articleRepository.save(article);
 
         // Then
         assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag", updatedHashtag);
